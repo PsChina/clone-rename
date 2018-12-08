@@ -64,25 +64,63 @@ It also can change the object。
 
 import cloneRename from 'clone-rename';
 
+let project = {name:'JavaScript'}
+
 let obj = {
     name:'PsChina',
     age:'25',
-    like:[{name:'JavaScript'}]
+    like:[project]
 }
 
 const filter = {
     name:'babel' // Rename all key name to Babel.
 }
 
-const result = cloneRename(obj,filter)
+const result1 = cloneRename(obj,filter) // default deepCopy & deepRename both true
 /*
-result:
+result1:
 {
     babel:'PsChina',
     age:'25',
     like:[{babel:'JavaScript'}]
 }
 */
+result1.like[0] === project // false
+```
+
+Shallow copy
+
+```js
+const result2 = cloneRename(obj,filter,{deepCopy:false})
+
+/*
+result2:
+{
+    babel:'PsChina',
+    age:'25',
+    like:[{name:'JavaScript'}]
+}
+*/
+
+result2.like[0] === project // true
+```
+
+Shallow rename
+
+```js
+const result3 = cloneRename(obj,filter,{deepRename:false})
+
+/*
+result3:
+{
+    babel:'PsChina',
+    age:'25',
+    like:[{name:'JavaScript'}]
+}
+*/
+result3.like[0] === project // false
+
+
 ```
 
 ## Copy

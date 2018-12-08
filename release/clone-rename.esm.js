@@ -1,26 +1,40 @@
 /**
- * @author Pan·ShanShan
- *
- * @description Last update 2018-04-11.
-*/
+ * @Author: shanshan.pan 
+ * @Date: 2018-04-11 14:30:14 
+ * @Last Modified by: shanshan.pan
+ * @Last Modified time: 2018-12-08 08:50:46
+ */
 
 /**
  * @param {Object} input Prepare the object to be cloned.
  *
  * @param {Object} filter The key to change the name.
  *
+ * @param {Object} opions Whether deep rename or deep copy
+ *
  * @return {Object} The newObj is the cloned object.
  *
  * The newArr is an array of clones.
 */
- function cloneRename( input, filter ) {
+ function cloneRename( input, filter, opions={} ) {
+    let {deepCopy, deepRename} = opions
+    if(deepCopy === undefined){
+        deepCopy = true
+    }
+    if(deepRename === undefined){
+        deepRename = true
+    }
     if ( typeof input === 'object' || input instanceof Function) {
         if ( input instanceof Array ) {
             let newArr = []
             for ( let i=0, length=input.length; i<length; i++ ) {
                 let item = input[i]
-                if ( typeof item === 'object' ) {
-                    newArr.push( cloneRename( item, filter ) )
+                if (deepCopy) {
+                    if ( typeof item === 'object' ) {
+                        newArr.push( cloneRename( item, filter, opions ) )
+                    } else {
+                        newArr.push( item )
+                    }
                 } else {
                     newArr.push( item )
                 }
@@ -41,9 +55,18 @@
             for ( let key in input ) {
                 if ( input.hasOwnProperty(key) ) {
                     let value = input[key]
-                    if ( typeof value === 'object' ) {
-                        let obj = cloneRename( value, filter )
-                        newObj[cloneRename.filterKey( key, filter )] = obj
+                    if(deepCopy){
+                        if ( typeof value === 'object' ) {
+                            let obj
+                            if(deepRename){
+                                obj = cloneRename( value, filter, opions )
+                            } else {
+                                obj = cloneRename( value, {} , opions )
+                            }
+                            newObj[cloneRename.filterKey( key, filter )] = obj
+                        } else {
+                            newObj[cloneRename.filterKey( key, filter )] = value
+                        }
                     } else {
                         newObj[cloneRename.filterKey( key, filter )] = value
                     }
@@ -66,7 +89,9 @@ cloneRename.filterKey = function( key, filter ) {
     if ( typeof filter === 'object' ) {
         for ( let defauktKey in filter ) {
             if ( key === defauktKey ) {
+
                 key = filter[defauktKey]
+                
             }
         }
     }

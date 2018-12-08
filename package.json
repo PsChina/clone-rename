@@ -1,6 +1,6 @@
 {
   "_from": "clone-rename",
-  "_id": "clone-rename@1.1.7",
+  "_id": "clone-rename@1.1.8",
   "_inBundle": false,
   "_integrity": "sha512-dWLWORxd6gbW29OZdESnxHkDnyuvboAtfm//CR48cfdXq8N+7SdKFZvTp68jhZdWqQCBbu9Vtt/YeSDWLKftHA==",
   "_location": "/clone-rename",
@@ -58,5 +58,9 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "title": "cloneRename",
-  "version": "1.1.7"
+  "version": "1.1.8",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PsChina/clone-rename"
+  }
 }
