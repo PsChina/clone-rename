@@ -1,5 +1,7 @@
 # clone-rename
 
+[中文文档]()
+
 Deep clone your object and rename the key.
 
 ## Get start
