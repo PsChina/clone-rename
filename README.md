@@ -35,8 +35,8 @@ const res = [
 ]
 
 const filter = {
-    id:'goodsID', // Rename all key id to goodsID.
-    name: 'goodsName' // Rename all name id to goodsName.
+    id:'goodsID', // Rename all attribute id to goodsID.
+    name: 'goodsName' // Rename all attribute name to goodsName.
 }
 
 const result = cloneRename(res,filter) // deep copy
