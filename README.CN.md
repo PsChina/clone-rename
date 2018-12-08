@@ -1,6 +1,6 @@
 # clone-rename
 
-[English]()
+[English](https://github.com/PsChina/clone-rename)
 
 深拷贝你的对象并且重命名属性。
 

@@ -1,6 +1,6 @@
 # clone-rename
 
-[中文文档]()
+[中文文档](https://github.com/PsChina/clone-rename/blob/master/README.CN.md)
 
 Deep clone your object and rename the key.
 
