@@ -26,10 +26,13 @@
   "author": {
     "name": "https://github.com/PsChina"
   },
-  "bundleDependencies": false,
+  "bundleDependencies": [],
   "deprecated": false,
   "description": "deep copy object and rename keys.",
-  "devDependencies": {},
+  "devDependencies": {
+    "terser": "^5.47.1",
+    "typescript": "^5.4.0"
+  },
   "keywords": [
     "clone",
     "deep-clone",
@@ -58,37 +61,43 @@
     ".": {
       "types": "./dist/clone-rename.d.ts",
       "require": "./dist/clone-rename.js",
-      "import": "./dist/clone-rename.js",
+      "import": "./release/clone-rename.mjs",
       "default": "./dist/clone-rename.js"
     },
     "./dist/clone-rename.js": {
       "types": "./dist/clone-rename.d.ts",
       "require": "./dist/clone-rename.js",
-      "import": "./dist/clone-rename.js",
       "default": "./dist/clone-rename.js"
     },
     "./release/clone-rename.js": {
       "types": "./release/clone-rename.d.ts",
       "require": "./release/clone-rename.js",
-      "import": "./release/clone-rename.js",
       "default": "./release/clone-rename.js"
     },
-    "./release/clone-rename.esm.js": {
+    "./release/clone-rename.mjs": {
       "types": "./release/clone-rename.d.ts",
-      "import": "./release/clone-rename.esm.js",
-      "default": "./release/clone-rename.esm.js"
+      "import": "./release/clone-rename.mjs",
+      "default": "./release/clone-rename.mjs"
     },
     "./release/clone-rename.min.js": {
       "types": "./release/clone-rename.d.ts",
       "require": "./release/clone-rename.min.js",
-      "import": "./release/clone-rename.min.js",
       "default": "./release/clone-rename.min.js"
     },
     "./package.json": "./package.json"
   },
   "name": "clone-rename",
   "scripts": {
-    "test": "node test/clone-rename.test.mjs"
+    "build": "npm run clean && npm run build:cjs && npm run build:esm && npm run build:post",
+    "clean": "rm -rf dist release",
+    "build:cjs": "tsc -p tsconfig.json && mv dist/index.js dist/clone-rename.js && mv dist/index.d.ts dist/clone-rename.d.ts",
+    "build:esm": "tsc -p tsconfig.esm.json && mv release/index.js release/clone-rename.mjs && mv release/index.d.ts release/clone-rename.d.ts",
+    "build:post": "cp dist/clone-rename.js release/clone-rename.js && cp dist/clone-rename.d.ts release/clone-rename.d.ts && npx terser dist/clone-rename.js -o release/clone-rename.min.js -c -m",
+    "prepublishOnly": "npm run build && npm test",
+    "test": "npm run test:dist && npm run test:cjs && npm run test:esm",
+    "test:dist": "node test/test-dist.mjs",
+    "test:cjs": "node test/test-cjs.cjs",
+    "test:esm": "node test/test-esm.mjs"
   },
   "files": [
     "dist",
