@@ -1,5 +1,8 @@
 # clone-rename
 
+[![npm version](https://img.shields.io/npm/v/clone-rename.svg)](https://www.npmjs.com/package/clone-rename)
+[![npm downloads](https://img.shields.io/npm/dm/clone-rename.svg)](https://www.npmjs.com/package/clone-rename)
+
 [中文文档](https://github.com/PsChina/clone-rename/blob/master/README.CN.md)
 
 Deep clone your data and rename object keys. It is useful when backend, third-party, or mock data uses different field names from your frontend model.

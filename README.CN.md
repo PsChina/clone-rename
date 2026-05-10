@@ -1,5 +1,8 @@
 # clone-rename
 
+[![npm version](https://img.shields.io/npm/v/clone-rename.svg)](https://www.npmjs.com/package/clone-rename)
+[![npm downloads](https://img.shields.io/npm/dm/clone-rename.svg)](https://www.npmjs.com/package/clone-rename)
+
 [English](https://github.com/PsChina/clone-rename)
 
 深拷贝你的数据，并重命名对象 key。适合处理后端接口、第三方接口、mock 数据和前端模型字段名不一致的场景。
