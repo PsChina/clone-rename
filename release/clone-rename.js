@@ -21,6 +21,27 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
+function getChildPath(parentPath, key) {
+  return parentPath ? parentPath + "." + key : key;
+}
+
+function getPathLeaf(path) {
+  var parts = path.split(".");
+  var leaf = parts[parts.length - 1];
+  return leaf === undefined ? path : leaf;
+}
+
+function createRenameContext(key, parentPath, value) {
+  var path = getChildPath(parentPath, key);
+  return {
+    key: key,
+    path: path,
+    parentPath: parentPath,
+    depth: parentPath ? parentPath.split(".").length : 0,
+    value: value
+  };
+}
+
 /**
  * @Author: shanshan.pan 
  * @Date: 2018-04-11 14:30:14 
@@ -33,16 +54,17 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
  *
  * @param {Object} filter The key to change the name.
  *
- * @param {Object} opions Whether deep rename or deep copy
+ * @param {Object} options Whether deep rename or deep copy
  *
  * @return {Object} The newObj is the cloned object.
  *
  * The newArr is an array of clones.
 */
 function cloneRename(input, filter) {
-  var opions = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-  var deepCopy = opions.deepCopy,
-      deepRename = opions.deepRename;
+  var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+  var parentPath = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : "";
+  var deepCopy = options.deepCopy,
+      deepRename = options.deepRename;
 
   if (deepCopy === undefined) {
     deepCopy = true;
@@ -50,6 +72,10 @@ function cloneRename(input, filter) {
 
   if (deepRename === undefined) {
     deepRename = true;
+  }
+
+  if (input === null || input === undefined) {
+    return input;
   }
 
   if (_typeof(input) === 'object' || input instanceof Function) {
@@ -61,7 +87,7 @@ function cloneRename(input, filter) {
 
         if (deepCopy) {
           if (_typeof(item) === 'object') {
-            newArr.push(cloneRename(item, filter, opions));
+            newArr.push(cloneRename(item, filter, options, getChildPath(parentPath, String(i))));
           } else {
             newArr.push(item);
           }
@@ -87,23 +113,25 @@ function cloneRename(input, filter) {
       for (var key in input) {
         if (input.hasOwnProperty(key)) {
           var value = input[key];
+          var context = createRenameContext(key, parentPath, value);
+          var newKey = cloneRename.filterKey(key, filter, context);
 
           if (deepCopy) {
             if (_typeof(value) === 'object') {
               var obj = void 0;
 
               if (deepRename) {
-                obj = cloneRename(value, filter, opions);
+                obj = cloneRename(value, filter, options, context.path);
               } else {
-                obj = cloneRename(value, {}, opions);
+                obj = cloneRename(value, undefined, options, context.path);
               }
 
-              newObj[cloneRename.filterKey(key, filter)] = obj;
+              newObj[newKey] = obj;
             } else {
-              newObj[cloneRename.filterKey(key, filter)] = value;
+              newObj[newKey] = value;
             }
           } else {
-            newObj[cloneRename.filterKey(key, filter)] = value;
+            newObj[newKey] = value;
           }
         }
       }
@@ -123,11 +151,19 @@ function cloneRename(input, filter) {
 */
 
 
-cloneRename.filterKey = function (key, filter) {
-  if (_typeof(filter) === 'object') {
-    for (var defauktKey in filter) {
-      if (key === defauktKey) {
-        key = filter[defauktKey];
+cloneRename.filterKey = function (key, filter, context) {
+  if (typeof filter === "function") {
+    return filter(key, context || createRenameContext(key, "", undefined));
+  }
+
+  if (filter && _typeof(filter) === 'object') {
+    if (context && Object.prototype.hasOwnProperty.call(filter, context.path)) {
+      return getPathLeaf(filter[context.path]);
+    }
+
+    for (var defaultKey in filter) {
+      if (key === defaultKey) {
+        key = filter[defaultKey];
       }
     }
   }

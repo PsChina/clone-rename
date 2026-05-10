@@ -2,170 +2,247 @@
 
 [中文文档](https://github.com/PsChina/clone-rename/blob/master/README.CN.md)
 
-Deep clone your object and rename the key.
+Deep clone your data and rename object keys. It is useful when backend, third-party, or mock data uses different field names from your frontend model.
 
-## Get start
+## Install
 
 ```bash
-> npm install clone-rename
+npm install clone-rename
 ```
 
 ## Usage
 
-Used when the data returned by the back end is inconsistent with the property name used by the front end.
+```js
+import cloneRename from 'clone-rename';
 
-### Example
+const result = cloneRename(data, filter, options);
+```
 
-The current backend separation assumes that the item information is displayed when you use the goodsID and goodsName properties and the backend provides the id and name
+The legacy API is still the main API:
 
-just use clone-rename to change the attribute name
+```js
+cloneRename(input, filter, {
+  deepCopy: true,
+  deepRename: true
+});
+```
 
-#### Array
+## Rename Rules
+
+### Basic key map
+
+Renames every matching key at every nested level by default.
 
 ```js
 import cloneRename from 'clone-rename';
 
 const res = [
-    {
-        id: '001',
-        name: 'apple'
-    },
-    {
-        id: '002',
-        name: 'banana'
-    }
-]
+  {
+    id: '001',
+    name: 'apple'
+  },
+  {
+    id: '002',
+    name: 'banana'
+  }
+];
 
-const filter = {
-    id:'goodsID', // Rename all attribute id to goodsID.
-    name: 'goodsName' // Rename all attribute name to goodsName.
-}
-
-const result = cloneRename(res,filter) // deep copy
+const result = cloneRename(res, {
+  id: 'goodsID',
+  name: 'goodsName'
+});
 
 /*
-result:
 [
-    {
-        goodsID: '001',
-        goodsName: 'apple'
-    },
-    {
-        goodsID: '002',
-        goodsName: 'banana'
-    }
+  {
+    goodsID: '001',
+    goodsName: 'apple'
+  },
+  {
+    goodsID: '002',
+    goodsName: 'banana'
+  }
 ]
 */
 ```
 
-#### Object
+### Path-based key map
 
-It also can change the object。
+Use dot paths when you only want to rename a specific nested field.
 
 ```js
-
 import cloneRename from 'clone-rename';
 
-let project = {name:'JavaScript'}
-
-let obj = {
-    name:'PsChina',
-    age:'25',
-    like:[project]
-}
-
-const filter = {
-    name:'babel' // Rename all key name to Babel.
-}
-
-const result1 = cloneRename(obj,filter) // default deepCopy & deepRename both true
-/*
-result1:
-{
-    babel:'PsChina',
-    age:'25',
-    like:[{babel:'JavaScript'}]
-}
-*/
-result1.like[0] === project // false
-```
-
-Shallow copy
-
-```js
-const result2 = cloneRename(obj,filter,{deepCopy:false})
-
-/*
-result2:
-{
-    babel:'PsChina',
-    age:'25',
-    like:[{name:'JavaScript'}]
-}
-*/
-
-result2.like[0] === project // true
-```
-
-Shallow rename
-
-```js
-const result3 = cloneRename(obj,filter,{deepRename:false})
-
-/*
-result3:
-{
-    babel:'PsChina',
-    age:'25',
-    like:[{name:'JavaScript'}]
-}
-*/
-result3.like[0] === project // false
-
-
-```
-
-## Copy
-
-It also helps you copy objects that contain Date RegExp and Function objects.
-
-### Date
-
-```js
-let time = new Date();
-
-let sameTime = cloneRename(time);
-
-console.log(time, sameTime ,time===sameTime);
-// <currentTime> <currentTime> false
-```
-
-### Function
-
-```js
-function sum(a, b){
-    return a + b;
+const data = {
+  id: 'root-001',
+  user: {
+    id: 'user-001',
+    profile: {
+      name: 'Ada Lovelace'
+    }
+  },
+  order: {
+    id: 'order-001'
+  }
 };
 
-let sameSum = cloneRename(sum);
+const result = cloneRename(data, {
+  'user.id': 'user.userId',
+  'user.profile.name': 'user.profile.displayName'
+});
 
-sum(1,2);
-//3
-
-sameSum(1,2);
-//3
-
-console.log(sum === sameSum);
-//false
+/*
+{
+  id: 'root-001',
+  user: {
+    userId: 'user-001',
+    profile: {
+      displayName: 'Ada Lovelace'
+    }
+  },
+  order: {
+    id: 'order-001'
+  }
+}
+*/
 ```
 
-### RgeExp
+### Function key map
+
+Pass a function when the new key depends on the current key or its context.
 
 ```js
-let numberRegObj = {reg:/[0-9]/};
+import cloneRename from 'clone-rename';
 
-let newRegObj = cloneRename(numberRegObj);
+function camelCase(key) {
+  return key.replace(/_([a-z])/g, (_, char) => char.toUpperCase());
+}
 
-console.log(numberRegObj, newRegObj, numberRegObj.reg === newRegObj.reg);
-// {reg:/[0-9]/} {reg:/[0-9]/} false
+const result = cloneRename(data, (key, context) => {
+  if (context.path === 'user.id') return 'userId';
+  if (key.includes('_')) return camelCase(key);
+  return key;
+});
+```
+
+The context object contains:
+
+```ts
+{
+  key: string;
+  path: string;
+  parentPath: string;
+  depth: number;
+  value: any;
+}
+```
+
+## Options
+
+### Default behavior
+
+`deepCopy` and `deepRename` are both `true` by default.
+
+```js
+const project = { name: 'JavaScript' };
+
+const obj = {
+  name: 'PsChina',
+  age: '25',
+  like: [project]
+};
+
+const result = cloneRename(obj, {
+  name: 'babel'
+});
+
+/*
+{
+  babel: 'PsChina',
+  age: '25',
+  like: [{ babel: 'JavaScript' }]
+}
+*/
+
+result.like[0] === project; // false
+```
+
+### Shallow copy
+
+```js
+const result = cloneRename(obj, filter, {
+  deepCopy: false
+});
+```
+
+Nested values keep their original references.
+
+### Shallow rename
+
+```js
+const result = cloneRename(obj, filter, {
+  deepRename: false
+});
+```
+
+Nested values are still copied, but nested keys are not renamed.
+
+## Copy Support
+
+`cloneRename` can clone `Date`, `RegExp`, and root `Function` values.
+
+```js
+const time = new Date();
+const sameTime = cloneRename(time);
+
+console.log(time === sameTime); // false
+```
+
+```js
+function sum(a, b) {
+  return a + b;
+}
+
+const sameSum = cloneRename(sum);
+
+sameSum(1, 2); // 3
+console.log(sum === sameSum); // false
+```
+
+```js
+const numberRegObj = { reg: /[0-9]/ };
+const newRegObj = cloneRename(numberRegObj);
+
+console.log(numberRegObj.reg === newRegObj.reg); // false
+```
+
+## TypeScript
+
+Type declarations are included.
+
+```ts
+import cloneRename, {
+  type RenameContext,
+  type RenameFilter,
+  type CloneRenameOptions
+} from 'clone-rename';
+
+const filter: RenameFilter = {
+  'user.id': 'user.userId'
+};
+
+const options: CloneRenameOptions = {
+  deepCopy: true,
+  deepRename: true
+};
+
+const result = cloneRename({ user: { id: 1 } }, filter, options);
+
+cloneRename(
+  { user: { id: 1 } },
+  (key: string, context: RenameContext) => {
+    if (context.path === 'user.id') return 'userId';
+    return key;
+  }
+);
 ```

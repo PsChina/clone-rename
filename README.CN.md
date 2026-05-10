@@ -2,168 +2,247 @@
 
 [English](https://github.com/PsChina/clone-rename)
 
-深拷贝你的对象并且重命名属性。
+深拷贝你的数据，并重命名对象 key。适合处理后端接口、第三方接口、mock 数据和前端模型字段名不一致的场景。
 
-## 开始
+## 安装
 
 ```bash
-> npm install clone-rename
+npm install clone-rename
 ```
 
-## 何时使用
+## 使用
 
-前后端分离的情况下，后端返回数据的属性名称和前端独立开发时使用的属性名称不一样。
+```js
+import cloneRename from 'clone-rename';
 
-### 例子
+const result = cloneRename(data, filter, options);
+```
 
-后端返回数据的属性名称是 `id` 和 `name` 但是 mock 数据时前端使用的是 `goodsID` 和 `goodsName`。
+旧 API 仍然是主 API：
 
-#### 拷贝数组
+```js
+cloneRename(input, filter, {
+  deepCopy: true,
+  deepRename: true
+});
+```
+
+## 重命名规则
+
+### 普通 key 映射
+
+默认会递归重命名所有层级里匹配到的 key。
 
 ```js
 import cloneRename from 'clone-rename';
 
 const res = [
-    {
-        id: '001',
-        name: 'apple'
-    },
-    {
-        id: '002',
-        name: 'banana'
-    }
-]
+  {
+    id: '001',
+    name: 'apple'
+  },
+  {
+    id: '002',
+    name: 'banana'
+  }
+];
 
-const filter = {
-    id:'goodsID', // 将所有属性为 id 的 key 更改为 goodsID 。
-    name: 'goodsName' // 将所有属性为 name 的 key 更改为 goodsName 。
-}
-
-const result = cloneRename(res,filter) // 默认是深拷贝
+const result = cloneRename(res, {
+  id: 'goodsID',
+  name: 'goodsName'
+});
 
 /*
-result:
 [
-    {
-        goodsID: '001',
-        goodsName: 'apple'
-    },
-    {
-        goodsID: '002',
-        goodsName: 'banana'
-    }
+  {
+    goodsID: '001',
+    goodsName: 'apple'
+  },
+  {
+    goodsID: '002',
+    goodsName: 'banana'
+  }
 ]
 */
 ```
 
-#### 拷贝对象
+### 路径 key 映射
 
-它还能拷贝对象
+如果只想改某个具体的嵌套字段，可以使用点路径。
 
 ```js
-
 import cloneRename from 'clone-rename';
 
-let project = {name:'JavaScript'}
-
-let obj = {
-    name:'PsChina',
-    age:'25',
-    like:[project]
-}
-
-const filter = {
-    name:'babel' // 将所有属性名为 name 的 key 改名为 babel 。
-}
-
-const result1 = cloneRename(obj,filter) // 第三个参数不传递默认是开始深拷贝和深度更改键名。{deepCopy:true, deepRename:true}
-/*
-result1:
-{
-    babel:'PsChina',
-    age:'25',
-    like:[{babel:'JavaScript'}]
-}
-*/
-result1.like[0] === project // false
-```
-
-浅层拷贝
-
-```js
-const result2 = cloneRename(obj,filter,{deepCopy:false})
-
-/*
-result2:
-{
-    babel:'PsChina',
-    age:'25',
-    like:[{name:'JavaScript'}]
-}
-*/
-
-result2.like[0] === project // true
-```
-
-浅层重命名
-
-```js
-const result3 = cloneRename(obj,filter,{deepRename:false})
-
-/*
-result3:
-{
-    babel:'PsChina',
-    age:'25',
-    like:[{name:'JavaScript'}]
-}
-*/
-result3.like[0] === project // false
-
-
-```
-
-## 拷贝
-
-它还能拷贝 date 对象和 function 以及正则表达式
-
-### 拷贝日期对象
-
-```js
-let time = new Date();
-
-let sameTime = cloneRename(time);
-
-console.log(time, sameTime ,time===sameTime);
-// <currentTime> <currentTime> false
-```
-
-### 拷贝函数
-
-```js
-function sum(a, b){
-    return a + b;
+const data = {
+  id: 'root-001',
+  user: {
+    id: 'user-001',
+    profile: {
+      name: 'Ada Lovelace'
+    }
+  },
+  order: {
+    id: 'order-001'
+  }
 };
 
-let sameSum = cloneRename(sum);
+const result = cloneRename(data, {
+  'user.id': 'user.userId',
+  'user.profile.name': 'user.profile.displayName'
+});
 
-sum(1,2);
-//3
-
-sameSum(1,2);
-//3
-
-console.log(sum === sameSum);
-//false
+/*
+{
+  id: 'root-001',
+  user: {
+    userId: 'user-001',
+    profile: {
+      displayName: 'Ada Lovelace'
+    }
+  },
+  order: {
+    id: 'order-001'
+  }
+}
+*/
 ```
 
-### 拷贝正则表达式
+### 函数 key 映射
+
+当新 key 需要根据当前 key 或上下文动态决定时，可以传函数。
 
 ```js
-let numberRegObj = {reg:/[0-9]/};
+import cloneRename from 'clone-rename';
 
-let newRegObj = cloneRename(numberRegObj);
+function camelCase(key) {
+  return key.replace(/_([a-z])/g, (_, char) => char.toUpperCase());
+}
 
-console.log(numberRegObj, newRegObj, numberRegObj.reg === newRegObj.reg);
-// {reg:/[0-9]/} {reg:/[0-9]/} false
+const result = cloneRename(data, (key, context) => {
+  if (context.path === 'user.id') return 'userId';
+  if (key.includes('_')) return camelCase(key);
+  return key;
+});
+```
+
+`context` 包含：
+
+```ts
+{
+  key: string;
+  path: string;
+  parentPath: string;
+  depth: number;
+  value: any;
+}
+```
+
+## 选项
+
+### 默认行为
+
+`deepCopy` 和 `deepRename` 默认都是 `true`。
+
+```js
+const project = { name: 'JavaScript' };
+
+const obj = {
+  name: 'PsChina',
+  age: '25',
+  like: [project]
+};
+
+const result = cloneRename(obj, {
+  name: 'babel'
+});
+
+/*
+{
+  babel: 'PsChina',
+  age: '25',
+  like: [{ babel: 'JavaScript' }]
+}
+*/
+
+result.like[0] === project; // false
+```
+
+### 浅拷贝
+
+```js
+const result = cloneRename(obj, filter, {
+  deepCopy: false
+});
+```
+
+嵌套值会保留原来的引用。
+
+### 浅层重命名
+
+```js
+const result = cloneRename(obj, filter, {
+  deepRename: false
+});
+```
+
+嵌套值仍然会被拷贝，但嵌套 key 不会被重命名。
+
+## 拷贝支持
+
+`cloneRename` 可以拷贝 `Date`、`RegExp` 和作为根输入的 `Function`。
+
+```js
+const time = new Date();
+const sameTime = cloneRename(time);
+
+console.log(time === sameTime); // false
+```
+
+```js
+function sum(a, b) {
+  return a + b;
+}
+
+const sameSum = cloneRename(sum);
+
+sameSum(1, 2); // 3
+console.log(sum === sameSum); // false
+```
+
+```js
+const numberRegObj = { reg: /[0-9]/ };
+const newRegObj = cloneRename(numberRegObj);
+
+console.log(numberRegObj.reg === newRegObj.reg); // false
+```
+
+## TypeScript
+
+包内置类型声明。
+
+```ts
+import cloneRename, {
+  type RenameContext,
+  type RenameFilter,
+  type CloneRenameOptions
+} from 'clone-rename';
+
+const filter: RenameFilter = {
+  'user.id': 'user.userId'
+};
+
+const options: CloneRenameOptions = {
+  deepCopy: true,
+  deepRename: true
+};
+
+const result = cloneRename({ user: { id: 1 } }, filter, options);
+
+cloneRename(
+  { user: { id: 1 } },
+  (key: string, context: RenameContext) => {
+    if (context.path === 'user.id') return 'userId';
+    return key;
+  }
+);
 ```

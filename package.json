@@ -53,12 +53,50 @@
   ],
   "license": "ISC",
   "main": "dist/clone-rename.js",
+  "types": "dist/clone-rename.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/clone-rename.d.ts",
+      "require": "./dist/clone-rename.js",
+      "import": "./dist/clone-rename.js",
+      "default": "./dist/clone-rename.js"
+    },
+    "./dist/clone-rename.js": {
+      "types": "./dist/clone-rename.d.ts",
+      "require": "./dist/clone-rename.js",
+      "import": "./dist/clone-rename.js",
+      "default": "./dist/clone-rename.js"
+    },
+    "./release/clone-rename.js": {
+      "types": "./release/clone-rename.d.ts",
+      "require": "./release/clone-rename.js",
+      "import": "./release/clone-rename.js",
+      "default": "./release/clone-rename.js"
+    },
+    "./release/clone-rename.esm.js": {
+      "types": "./release/clone-rename.d.ts",
+      "import": "./release/clone-rename.esm.js",
+      "default": "./release/clone-rename.esm.js"
+    },
+    "./release/clone-rename.min.js": {
+      "types": "./release/clone-rename.d.ts",
+      "require": "./release/clone-rename.min.js",
+      "import": "./release/clone-rename.min.js",
+      "default": "./release/clone-rename.min.js"
+    },
+    "./package.json": "./package.json"
+  },
   "name": "clone-rename",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test/clone-rename.test.mjs"
   },
+  "files": [
+    "dist",
+    "release",
+    "src"
+  ],
   "title": "cloneRename",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/PsChina/clone-rename"
