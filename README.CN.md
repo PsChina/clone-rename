@@ -71,7 +71,7 @@ const result = cloneRename(res, {
 
 ### 路径 key 映射
 
-如果只想改某个具体的嵌套字段，可以使用点路径。
+如果只想改某个具体的嵌套字段，可以在**左边**用点路径定位。**右边**只是新的 key 名。
 
 ```js
 import cloneRename from 'clone-rename';
@@ -90,8 +90,8 @@ const data = {
 };
 
 const result = cloneRename(data, {
-  'user.id': 'user.userId',
-  'user.profile.name': 'user.profile.displayName'
+  'user.id': 'userId',
+  'user.profile.name': 'displayName'
 });
 
 /*
@@ -109,6 +109,8 @@ const result = cloneRename(data, {
 }
 */
 ```
+
+> **右侧规则：** 只取最后一个 `.` 之后的片段作为新 key 名。重命名在原位发生 —— `cloneRename` 不会跨节点移动字段。例如 `{ 'user.id': 'account.userId' }` 和 `{ 'user.id': 'userId' }` 等价，两者都会得到 `user.userId`，都不会创建 `account` 容器。
 
 ### 函数 key 映射
 
@@ -231,7 +233,7 @@ import cloneRename, {
 } from 'clone-rename';
 
 const filter: RenameFilter = {
-  'user.id': 'user.userId'
+  'user.id': 'userId'
 };
 
 const options: CloneRenameOptions = {

@@ -53,6 +53,18 @@ test('path-based key maps work', () => {
   assert.deepEqual(result, { user: { userId: 'u1' } });
 });
 
+test('path map right-hand side: only the leaf is used (rename in place, no move)', () => {
+  const data = { user: { id: 'u1' } };
+  const short = cloneRename(data, { 'user.id': 'userId' });
+  const long = cloneRename(data, { 'user.id': 'user.userId' });
+  const bogus = cloneRename(data, { 'user.id': 'account.userId' });
+
+  assert.deepEqual(short, { user: { userId: 'u1' } });
+  assert.deepEqual(short, long);
+  assert.deepEqual(short, bogus);
+  assert.equal(bogus.account, undefined);
+});
+
 test('function-based key maps work', () => {
   const result = cloneRename(
     { first_name: 'Ada' },

@@ -334,3 +334,70 @@ test('deepRename false does not rename nested keys but still deep copies', () =>
   assert.deepEqual(result, { renamed: { innerKey: 'value' } });
   assert.notEqual(result.renamed, nested);
 });
+
+// --- contract: path-based key map only uses the leaf of the right-hand side ---
+// Rename happens in place. The right-hand side's parent path (if any) is
+// purely cosmetic and is stripped before assignment. See getPathLeaf in src.
+// These tests pin that behavior so future refactors do not silently change it.
+
+const pathContractData = () => ({
+  id: 'root-001',
+  user: {
+    id: 'user-001',
+    profile: {
+      name: 'Ada Lovelace',
+      age: 28
+    }
+  }
+});
+
+const pathContractExpected = {
+  id: 'root-001',
+  user: {
+    userId: 'user-001',
+    profile: {
+      displayName: 'Ada Lovelace',
+      age: 28
+    }
+  }
+};
+
+test('path map: short right-hand side renames in place', () => {
+  const result = cloneRename(pathContractData(), {
+    'user.id': 'userId',
+    'user.profile.name': 'displayName'
+  });
+  assert.deepEqual(result, pathContractExpected);
+});
+
+test('path map: long symmetric right-hand side produces the identical result', () => {
+  const result = cloneRename(pathContractData(), {
+    'user.id': 'user.userId',
+    'user.profile.name': 'user.profile.displayName'
+  });
+  assert.deepEqual(result, pathContractExpected);
+});
+
+test('path map: right-hand side prefix is ignored — does not move fields across the tree', () => {
+  const result = cloneRename(pathContractData(), {
+    'user.id': 'account.userId'
+  });
+
+  assert.equal(result.user.userId, 'user-001', 'leaf "userId" lands at original location');
+  assert.equal(result.account, undefined, 'no "account" container is created');
+  assert.equal(result.user.id, undefined, 'original "id" key is gone');
+});
+
+test('path map: any right-hand prefix yields the same leaf result', () => {
+  const variants = [
+    { 'user.id': 'userId' },
+    { 'user.id': 'user.userId' },
+    { 'user.id': 'literally.anything.userId' },
+    { 'user.id': 'a.b.c.d.e.f.userId' }
+  ];
+
+  const [first, ...rest] = variants.map((filter) => cloneRename(pathContractData(), filter));
+  for (const other of rest) {
+    assert.deepEqual(other, first);
+  }
+});

@@ -71,7 +71,7 @@ const result = cloneRename(res, {
 
 ### Path-based key map
 
-Use dot paths when you only want to rename a specific nested field.
+Use dot paths on the **left** when you only want to rename a specific nested field. The **right** side is just the new key name.
 
 ```js
 import cloneRename from 'clone-rename';
@@ -90,8 +90,8 @@ const data = {
 };
 
 const result = cloneRename(data, {
-  'user.id': 'user.userId',
-  'user.profile.name': 'user.profile.displayName'
+  'user.id': 'userId',
+  'user.profile.name': 'displayName'
 });
 
 /*
@@ -109,6 +109,8 @@ const result = cloneRename(data, {
 }
 */
 ```
+
+> **Right-side rule:** only the last segment after the final `.` is used as the new key name. Renaming happens in place — `cloneRename` does not move fields across the tree. For example, `{ 'user.id': 'account.userId' }` and `{ 'user.id': 'userId' }` are equivalent; both produce `user.userId` and neither creates an `account` container.
 
 ### Function key map
 
@@ -231,7 +233,7 @@ import cloneRename, {
 } from 'clone-rename';
 
 const filter: RenameFilter = {
-  'user.id': 'user.userId'
+  'user.id': 'userId'
 };
 
 const options: CloneRenameOptions = {
