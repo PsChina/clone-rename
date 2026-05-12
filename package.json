@@ -1,59 +1,11 @@
 {
-  "_from": "clone-rename",
-  "_id": "clone-rename@1.2.0",
-  "_inBundle": false,
-  "_integrity": "sha512-dWLWORxd6gbW29OZdESnxHkDnyuvboAtfm//CR48cfdXq8N+7SdKFZvTp68jhZdWqQCBbu9Vtt/YeSDWLKftHA==",
-  "_location": "/clone-rename",
-  "_phantomChildren": {},
-  "_requested": {
-    "type": "tag",
-    "registry": true,
-    "raw": "clone-rename",
-    "name": "clone-rename",
-    "escapedName": "clone-rename",
-    "rawSpec": "",
-    "saveSpec": null,
-    "fetchSpec": "latest"
-  },
-  "_requiredBy": [
-    "#USER",
-    "/"
-  ],
-  "_resolved": "https://registry.npmjs.org/clone-rename/-/clone-rename-1.1.6.tgz",
-  "_shasum": "0ac4f0a967652845a84013addde3937237165409",
-  "_spec": "clone-rename",
-  "_where": "/Users/shanshanpan/Desktop/learn/npm",
+  "name": "clone-rename",
+  "version": "1.2.3",
+  "description": "deep copy object and rename keys.",
+  "title": "cloneRename",
   "author": {
     "name": "https://github.com/PsChina"
   },
-  "bundleDependencies": [],
-  "deprecated": false,
-  "description": "deep copy object and rename keys.",
-  "devDependencies": {
-    "terser": "^5.47.1",
-    "typescript": "^5.4.0"
-  },
-  "keywords": [
-    "clone",
-    "deep-clone",
-    "deepclone",
-    "copy",
-    "deep-copy",
-    "deepcopy",
-    "rename",
-    "clone-rename",
-    "clonerename",
-    "renamekey",
-    "rename-key",
-    "renameKey",
-    "clonedate",
-    "clone-date",
-    "cloneimage",
-    "clone-image",
-    "clone-function",
-    "copy-function",
-    "clonefunction"
-  ],
   "license": "ISC",
   "main": "dist/clone-rename.js",
   "types": "dist/clone-rename.d.ts",
@@ -86,7 +38,36 @@
     },
     "./package.json": "./package.json"
   },
-  "name": "clone-rename",
+  "files": [
+    "dist",
+    "release",
+    "src"
+  ],
+  "keywords": [
+    "clone",
+    "deep-clone",
+    "deepclone",
+    "copy",
+    "deep-copy",
+    "deepcopy",
+    "rename",
+    "clone-rename",
+    "clonerename",
+    "renamekey",
+    "rename-key",
+    "renameKey",
+    "clonedate",
+    "clone-date",
+    "cloneimage",
+    "clone-image",
+    "clone-function",
+    "copy-function",
+    "clonefunction"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PsChina/clone-rename.git"
+  },
   "scripts": {
     "build": "npm run clean && npm run build:cjs && npm run build:esm && npm run build:post",
     "clean": "rm -rf dist release",
@@ -99,15 +80,8 @@
     "test:cjs": "node test/test-cjs.cjs",
     "test:esm": "node test/test-esm.mjs"
   },
-  "files": [
-    "dist",
-    "release",
-    "src"
-  ],
-  "title": "cloneRename",
-  "version": "1.2.3",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/PsChina/clone-rename"
+  "devDependencies": {
+    "terser": "^5.47.1",
+    "typescript": "^5.4.0"
   }
 }
